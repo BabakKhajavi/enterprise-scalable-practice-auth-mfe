@@ -1,0 +1,40 @@
+{
+  "cSpell.words": [],
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#03a9f4", // light blue
+    "activityBarBadge.background": "#0288d1", // medium blue
+    "statusBar.background": "#0288d1", // medium blue
+    "titleBar.activeBackground": "#0288d1", // medium blue
+    "titleBar.inactiveBackground": "#0288d199", // medium blue with opacity
+    "activityBar.activeBackground": "#03a9f4", // light blue
+    "activityBar.foreground": "#e3f2fd",
+    "activityBar.inactiveForeground": "#e3f2fd99",
+    "activityBarBadge.foreground": "#e3f2fd",
+    "commandCenter.border": "#e3f2fd99",
+    "sash.hoverBorder": "#03a9f4", // light blue
+    "statusBar.foreground": "#e3f2fd",
+    "statusBarItem.hoverBackground": "#03a9f4", // light blue
+    "statusBarItem.remoteBackground": "#0288d1", // medium blue
+    "statusBarItem.remoteForeground": "#e3f2fd",
+    "titleBar.activeForeground": "#e3f2fd",
+    "titleBar.inactiveForeground": "#e3f2fd99"
+  },
+  "peacock.color": "#0288d1", // medium blue
+  "prettier.resolveGlobalModules": false,
+  "prettier.requireConfig": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "python-envs.pythonProjects": [
+    {
+      "path": "src/modules/layout.tsx",
+      "envManager": "ms-python.python:venv",
+      "packageManager": "ms-python.python:pip"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+# Ignore node_modules in the root and all workspaces
+node_modules
+apps/*/node_modules
+packages/*/node_modules
+
+# Ignore build output directories
+build
+dist
+apps/*/build
+apps/*/dist
+packages/*/build
+packages/*/dist
+
+# Ignore cache and temporary files
+.cache
+.next
+coverage
+tmp
+temp
+
+# Ignore specific files
+*.log
+*.lock
+*.tmp
+*.cache
+
+# Ignore environment files
+.env
+.env.local
+.env.*.local

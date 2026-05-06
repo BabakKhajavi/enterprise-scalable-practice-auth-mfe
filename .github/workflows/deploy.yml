@@ -1,0 +1,72 @@
+name: Deploy to S3
+
+on:
+  push:
+    branches: ['production', 'staging']
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: ${{ github.ref_name == 'production' && 'production' || 'staging' }}
+      ENTERPRISE_ASSET_URL: ${{ vars.ENTERPRISE_ASSET_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Clean lockfile
+        run: rm -f package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build TypeScript (ESM)
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to S3 (${{ vars.BUCKET_FOLDER_NAME }})
+        env:
+          S3_BUCKET_NAME: ${{ github.ref_name == 'production' && vars.PROD_APP_BUCKET || vars.STAGE_APP_BUCKET }}
+          BUCKET_FOLDER_NAME: ${{ vars.BUCKET_FOLDER_NAME }}
+        run: |
+          echo "Deploying to bucket: $S3_BUCKET_NAME"
+          echo "Folder: $BUCKET_FOLDER_NAME"
+          # Long cache for hashed assets
+          aws s3 sync dist/ "s3://$S3_BUCKET_NAME/$BUCKET_FOLDER_NAME" \
+            --delete \
+            --exclude "*.html" \
+            --exclude "remoteEntry*.js" \
+            --cache-control "public,max-age=31536000,immutable"
+
+          # No-cache for Module Federation manifest
+          aws s3 sync dist/ "s3://$S3_BUCKET_NAME/$BUCKET_FOLDER_NAME" \
+            --exclude "*" \
+            --include "remoteEntry*.js" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+          # No-cache for HTML entrypoints
+          aws s3 sync dist/ "s3://$S3_BUCKET_NAME/$BUCKET_FOLDER_NAME" \
+            --exclude "*" \
+            --include "*.html" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+      - name: Invalidate CloudFront cache
+        env:
+          DISTRIBUTION_ID: ${{ github.ref_name == 'production' && secrets.PROD_DISTRIBUTION || secrets.STAGE_DISTRIBUTION }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id $DISTRIBUTION_ID \
+            --paths "/*"
