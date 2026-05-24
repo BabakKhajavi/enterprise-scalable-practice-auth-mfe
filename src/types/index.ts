@@ -1,6 +1,6 @@
 export enum AuthPaths {
   ROOT = '/',
-  LOGIN = '/login',
+  LOGIN = '/',
   VERIFY_OTP = '/verify-otp',
   GOOGLE_CALLBACK = '/google-callback',
   DASHBOARD = '/dashboard',

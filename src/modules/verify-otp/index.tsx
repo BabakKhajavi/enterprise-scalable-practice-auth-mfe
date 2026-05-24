@@ -15,8 +15,8 @@ import { useAuth, useBrand } from '../../hooks';
 import { AuthPaths } from '../../types';
 export default function VerifyOtp() {
   const navigate = useNavigate();
-  const { login, verifyOtp, isLoadingVerifyOtp } = useAuth();
-  const { tenantTheme } = useBrand();
+  const { verifyOtp, isLoadingVerifyOtp, goToSampleBrand } = useAuth();
+  const { brand, refreshBrand } = useBrand();
   const [emailForOtp, setEmailForOtp] = useState<string>('');
   const [otpAvailableIn, setOtpAvailableIn] = useState(30);
   const location = useLocation();
@@ -30,7 +30,7 @@ export default function VerifyOtp() {
   const formik = useFormik({
     initialValues: {
       email: '',
-      otp: '',
+      otp: '123456',
     },
     validationSchema: Yup.object({
       otp: Yup.string()
@@ -64,19 +64,17 @@ export default function VerifyOtp() {
   }, [otpAvailableIn]);
 
   const handleBackToLogin = () => {
-    const selectedSource = location.state?.source || 'login';
-    navigate(
-      `${selectedSource === 'signup' ? AuthPaths.ROOT : AuthPaths.LOGIN}`,
-      { state: location.state },
-    );
+    let path: string = AuthPaths.LOGIN;
+    if (brand?.slug && brand?.slug !== 'default') {
+      path = `${AuthPaths.LOGIN}?slug=${brand.slug}`;
+    }
+    navigate(path, { state: location.state });
   };
-  const handleResendOtp = async () => {
-    await login({ email: emailForOtp });
-  };
+
   return (
     <Box component="form" onSubmit={formik.handleSubmit} sx={{ p: 3 }}>
       <Box mb={1}>
-        <OptimizedImage src={tenantTheme?.logoUrl} alt="Hero" height="60px" />
+        <OptimizedImage src={brand?.logoUrl} alt="Hero" height="60px" />
       </Box>
 
       <Stack
@@ -130,51 +128,36 @@ export default function VerifyOtp() {
         </ContainedButton>
       </Box>
       <Divider sx={{ my: 3 }} />
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ mb: 8 }}
-        spacing={1}
-      >
-        <Typography
-          variant="caption"
-          sx={{ color: (theme) => theme.palette.secondary.main }}
-        >
-          Resent otp in
-          <Typography
-            display="inline"
-            sx={{
-              fontWeight: 'bold',
-              mx: 0.5,
-              fontSize: 12,
-            }}
-          >
-            {otpAvailableIn}
-          </Typography>
-          seconds
-        </Typography>
+      <Typography variant="body2" sx={{ my: 3 }}>
+        Sample Brands to test white labeling:
+      </Typography>
+      <Stack>
         <LinkButton
-          onClick={handleResendOtp}
-          sx={{ fontSize: 12 }}
-          disabled={otpAvailableIn > 0}
+          onClick={() => {
+            goToSampleBrand();
+            refreshBrand();
+          }}
+          color="error"
         >
-          Resend Otp
+          Default Brand
         </LinkButton>
-      </Stack>
-
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="center"
-        sx={{ mb: 3 }}
-        spacing={0.5}
-      >
-        <Typography variant="caption" sx={{}}>
-          Don't have an account? sign up
-        </Typography>
-        <LinkButton onClick={handleBackToLogin} sx={{ fontSize: 12 }}>
-          here
+        <LinkButton
+          onClick={() => {
+            goToSampleBrand('companyA');
+            refreshBrand('companyA');
+          }}
+          color="error"
+        >
+          Company A
+        </LinkButton>
+        <LinkButton
+          onClick={() => {
+            goToSampleBrand('companyB');
+            refreshBrand('companyB');
+          }}
+          color="error"
+        >
+          Company B
         </LinkButton>
       </Stack>
     </Box>

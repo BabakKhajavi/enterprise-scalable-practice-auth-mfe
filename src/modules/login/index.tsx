@@ -1,6 +1,11 @@
 import React, { useEffect } from 'react';
-import { Box, Stack, Typography, styled } from '@mui/material';
-import { ContainedButton, Input, OptimizedImage } from 'enterprise_ui/atoms';
+import { Box, Stack, Typography } from '@mui/material';
+import {
+  ContainedButton,
+  Input,
+  OptimizedImage,
+  LinkButton,
+} from 'enterprise_ui/atoms';
 import { showToast } from 'enterprise_ui/molecules';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -8,26 +13,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth, useBrand } from '../../hooks';
 import { AuthPaths } from '../../types';
 
-const SocialButtonsWrapper = styled(Box)(({ theme }) => ({
-  flexDirection: 'column',
-  display: 'flex',
-  gap: theme.spacing(2),
-  background: theme.palette.background.default,
-  color: theme.palette.text.primary,
-}));
 export default function Login() {
-  const {
-    login,
-    signupOrLoginWithGoogle,
-    isLoadingRegularLogin,
-    isLoadingGoogleAuthUrl,
-  } = useAuth();
-  const { tenantTheme, getBrandConfig } = useBrand();
+  const { brand, refreshBrand } = useBrand();
+  const { goToSampleBrand } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const formik = useFormik({
     initialValues: {
-      email: '',
+      email: 'jane.doe@example.com',
     },
     validationSchema: Yup.object({
       email: Yup.string()
@@ -37,15 +30,12 @@ export default function Login() {
     }),
     onSubmit: async (values) => {
       try {
-        const result = await login(values);
-        if (result) {
-          navigate(`${AuthPaths.VERIFY_OTP}`, {
-            state: {
-              email: values.email,
-              source: 'login',
-            },
-          });
-        }
+        navigate(`${AuthPaths.VERIFY_OTP}`, {
+          state: {
+            email: values.email,
+            source: 'login',
+          },
+        });
       } catch (error: any) {
         showToast.error(
           error?.data?.message || 'Failed to login. Please try again.',
@@ -62,11 +52,10 @@ export default function Login() {
     }, 200);
     return () => clearTimeout(timer);
   }, [location.state, location.state?.email]);
-  console.log('Tenant theme in Login component:', tenantTheme?.logoUrl);
   return (
     <Box component="form" onSubmit={formik.handleSubmit} sx={{ p: 3 }}>
       <Box mb={1}>
-        <OptimizedImage src={tenantTheme?.logoUrl} alt="Hero" height="60px" />
+        <OptimizedImage src={brand?.logoUrl} alt="Hero" height="60px" />
       </Box>
       <Stack
         direction="row"
@@ -97,14 +86,41 @@ export default function Login() {
           fullWidth
           type="submit"
           sx={{ mt: 1 }}
-          disabled={
-            formik.isSubmitting || isLoadingRegularLogin || !formik.isValid
-          }
-          loading={isLoadingRegularLogin}
+          disabled={formik.isSubmitting || !formik.isValid}
+          loading={formik.isSubmitting}
         >
           Login
         </ContainedButton>
       </Box>
+      <Typography variant="body2" sx={{ my: 3 }}>
+        Sample Brands to test white labeling:
+      </Typography>
+      <Stack>
+        <LinkButton
+          onClick={() => {
+            goToSampleBrand();
+            refreshBrand();
+          }}
+        >
+          Default Brand
+        </LinkButton>
+        <LinkButton
+          onClick={() => {
+            goToSampleBrand('companyA');
+            refreshBrand('companyA');
+          }}
+        >
+          Company A
+        </LinkButton>
+        <LinkButton
+          onClick={() => {
+            goToSampleBrand('companyB');
+            refreshBrand('companyB');
+          }}
+        >
+          Company B
+        </LinkButton>
+      </Stack>
     </Box>
   );
 }

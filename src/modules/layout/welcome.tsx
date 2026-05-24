@@ -31,7 +31,8 @@ export const Welcome = () => {
   return (
     <WelcomeContent>
       <WelcomeHeadline>
-        Enterprise-Grade Micro Frontends in Practice
+        Building Enterprise-Ready Micro Frontends with React and Module
+        Federation
       </WelcomeHeadline>
       <WelcomePoints>
         <Box>
